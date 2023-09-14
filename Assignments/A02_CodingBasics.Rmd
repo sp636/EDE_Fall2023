@@ -1,6 +1,6 @@
 ---
 title: "Assignment 2: Coding Basics"
-author: "Student Name"
+author: Samantha Pace
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -23,8 +23,16 @@ This exercise accompanies the lessons in Environmental Data Analytics on coding 
 ## Basics, Part 1
 
 1.  Generate a sequence of numbers from one to 30, increasing by threes. Assign this sequence a name.
+```{r}
+seq(1,30,3) # This function is creating a sequence of numbers 1 to 30 by 3
+```
+```{r}
+sequence_by_3 <- seq(1,30,3) # This code chunk is indicating that the sequence generated in 
+```
+
 
 2.  Compute the mean and median of this sequence.
+
 
 3.  Ask R to determine whether the mean is greater than the median.
 
