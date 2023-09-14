@@ -29,50 +29,96 @@ seq(1,30,3) # This function is creating a sequence of numbers 1 to 30 by 3
 ```
 
 ```{r}
-sequence_by_3 <- seq(1,30,3) # This code chunk is indicating that the sequence generated in 
+sequence_by_3 <- seq(1,30,3) 
+# This code chunk is indicating that the sequence generated.
+#  The seq function is now assigned to the name sequence_by_3.
 ```
 
 2.  Compute the mean and median of this sequence.
+```{r}
+mean(sequence_by_3) 
+# This code chunk is referencing the object to find the mean.
+```
+
+```{r}
+median(sequence_by_3) 
+# This code chunk is finding the median of the object.
+```
 
 3.  Ask R to determine whether the mean is greater than the median.
+```{r}
+mean(sequence_by_3)>median(sequence_by_3) 
+# This code chunk is asking if the mean is greater than the median. 
+# Since they are both 14.5, the answer is false.
+```
+
 
 4.  Insert comments in your code to describe what you are doing.
 
 ```{r basics 1}
-#1. 
+#1. # This function is creating a sequence of numbers 1 to 30 by 3
 
-#2. 
+#2. # This code chunk is referencing the object to find the mean.
 
-#3. 
+#3. # This code chunk is asking if the mean is greater than the median. 
+# Since they are both 14.5, the answer is false.
 
 ```
 
 ## Basics, Part 2
 
 5.  Create a series of vectors, each with four components, consisting of (a) names of students, (b) test scores out of a total 100 points, and (c) whether or not they have passed the test (TRUE or FALSE) with a passing grade of 50.
+```{r}
+students <- c('Bob', 'Joe', 'Sam', 'Corey') # This is a character vector
+scores <- c(85,45,95,90) # This is a numerical vector.
+outcome <- c(T, F, T, T) # This is a character vector.
+passing_score <- 50
+
+```
 
 6.  Label each vector with a comment on what type of vector it is.
 
 7.  Combine each of the vectors into a data frame. Assign the data frame an informative name.
+```{r}
+students_scores <- data.frame(students, scores, outcome)
+print(students_scores)
+```
 
 8.  Label the columns of your data frame with informative titles.
 
 ```{r basics 2}
-
+print(students_scores)
 ```
 
 9.  QUESTION: How is this data frame different from a matrix?
 
-> Answer:
+> Answer: This data frame is different from a matrix in that it has different classes of variables. Data frames are versatile and can hold different types of data, matrices can only have a single type of tabular data.
 
 10. Create a function with an if/else statement. Your function should take a **vector** of test scores and print (not return) whether a given test score is a passing grade of 50 or above (TRUE or FALSE). You will need to choose either the `if` and `else` statements or the `ifelse` statement.
 
 11. Apply your function to the vector with test scores that you created in number 5.
 
 ```{r basics 3}
+if_else_function <- function(x){
+  if(scores>passing_score){
+    True
+  }
+    else{
+      false
+    }
+}
+try1 <-if_else_function(scores)
+try1
+```
+
+
+```{r}
+try2 <- function(x)
+  ifelse(scores > passing_score, true, false)
+try2(85)
 
 ```
 
 12. QUESTION: Which option of `if` and `else` vs. `ifelse` worked? Why?
 
-> Answer:
+> Answer: Neither function worked for how I set up the code chunks, which I included above. I thought the 'ifelse' code would work better than the 'if' and 'else'.
