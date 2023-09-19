@@ -1,6 +1,6 @@
 ---
 title: "Assignment 3: Data Exploration"
-author: "Student Name"
+author: Samantha Pace
 date: "Fall 2023"
 output: pdf_document
 geometry: margin=2.54cm
@@ -33,7 +33,11 @@ This exercise accompanies the lessons in Environmental Data Analytics on Data Ex
 1.  Check your working directory, load necessary packages (tidyverse, lubridate), and upload two datasets: the ECOTOX neonicotinoid dataset (ECOTOX_Neonicotinoids_Insects_raw.csv) and the Niwot Ridge NEON dataset for litter and woody debris (NEON_NIWO_Litter_massdata_2018-08_raw.csv). Name these datasets "Neonics" and "Litter", respectively. Be sure to include the subcommand to read strings in as factors.
 
 ```{r,  message = FALSE}
-
+getwd() # This code chuck is checking the working directory, which is the EDE_Fall2023 folder
+```
+```{r}
+install.packages("tidyverse")
+install.packages("lubridate")
 ```
 
 ## Learn about your system
