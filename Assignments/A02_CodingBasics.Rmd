@@ -25,7 +25,8 @@ This exercise accompanies the lessons in Environmental Data Analytics on coding 
 1.  Generate a sequence of numbers from one to 30, increasing by threes. Assign this sequence a name.
 
 ```{r}
-seq(1,30,3) # This function is creating a sequence of numbers 1 to 30 by 3
+named.sequence <- seq(1,30,3) # This function is creating a sequence of numbers 1 to 30 by 3
+named.sequence
 ```
 
 ```{r}
@@ -71,7 +72,8 @@ mean(sequence_by_3)>median(sequence_by_3)
 ```{r}
 students <- c('Bob', 'Joe', 'Sam', 'Corey') # This is a character vector
 scores <- c(85,45,95,90) # This is a numerical vector.
-outcome <- c(T, F, T, T) # This is a character vector.
+outcome <- c(TRUE, FALSE, TRUE, TRUE) # This is a LOGICAL vector.
+
 passing_score <- 50
 
 ```
@@ -87,6 +89,7 @@ print(students_scores)
 8.  Label the columns of your data frame with informative titles.
 
 ```{r basics 2}
+names(students_scores) <- c("Students", "Test.Scores", "Pass.or.Fail")
 print(students_scores)
 ```
 
@@ -100,13 +103,17 @@ print(students_scores)
 
 ```{r basics 3}
 if_else_function <- function(x){
-  if(scores>passing_score){
+  if(x>=passing_score){
     True
   }
     else{
       false
     }
 }
+if_else_function <- function(x){
+  ifelse(x>=passing_score,TRUE, FALSE)  }
+    
+
 try1 <-if_else_function(scores)
 try1
 ```
@@ -114,8 +121,8 @@ try1
 
 ```{r}
 try2 <- function(x)
-  ifelse(scores > passing_score, true, false)
-try2(85)
+  ifelse(x > passing_score,TRUE, FALSE)
+try2(scores)
 
 ```
 
