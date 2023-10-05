@@ -42,12 +42,12 @@ print(O3plot)
 
 O3plot1 <- ggplot(EPAair) +
   geom_point(aes(x = Date, y = Ozone)) +
-  theme_gray()
+  theme_gray() # default ggplot
 print(O3plot1)
 
 O3plot2 <- ggplot(EPAair) +
   geom_point(aes(x = Date, y = Ozone)) +
-  theme_bw()
+  theme_bw() # dark on light/white background, black axes
 print(O3plot2)
 
 O3plot3 <- ggplot(EPAair) +
@@ -57,7 +57,7 @@ print(O3plot3)
 
 O3plot4 <- ggplot(EPAair) +
   geom_point(aes(x = Date, y = Ozone)) +
-  theme_classic()
+  theme_classic() # black axes, black dots, no grid lines
 print(O3plot4)
 ```
 

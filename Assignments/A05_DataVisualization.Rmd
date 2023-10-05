@@ -1,6 +1,6 @@
 ---
 title: "Assignment 5: Data Visualization"
-author: "Student Name"
+author: Samantha Pace
 date: "Fall 2023"
 output: pdf_document
 geometry: margin=2.54cm
@@ -33,7 +33,37 @@ This exercise accompanies the lessons in Environmental Data Analytics on Data Vi
 ```{r initialize project}
 #1 
 
+#install.packages("tidyverse") 
+#install.packages("lubridate") 
+#install.packages("here") 
+#install.packages("cowplot")
+# they are all now comments so it will knit.
+
+library(tidyverse) 
+library(lubridate)
+library(here)
+library(cowplot)
+# These code chunks are loading the packages.
+
+getwd() # verifying working directory
+setwd("/home/guest/R/EDE_Fall2023") #setting wd to EDE_Fall2023
+getwd() # checking wd again
+
+# the two code chunks below are reading in the processed datasets.
+
+Peter.Paul.chem.nutrients <-
+  read.csv(
+  "./Data/Processed_KEY/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv",
+  stringsAsFactors = TRUE)
+
+Neon.Niwo.litter <-
+  read.csv("./Data/Processed_KEY/NEON_NIWO_Litter_mass_trap_Processed.csv",
+           stringsAsFactors = TRUE)
+
 #2 
+# fixing dates to be date format
+Peter.Paul.chem.nutrients$sampledate <- ymd(Peter.Paul.chem.nutrients$sampledate)
+Neon.Niwo.litter$collectDate <- ymd(Neon.Niwo.litter$collectDate)
 
 ```
 ## Define your theme
@@ -46,6 +76,16 @@ This exercise accompanies the lessons in Environmental Data Analytics on Data Vi
 
 ```{r build plot theme}
 #3
+# creating a theme based on the bw theme; larger text; modified background plot
+# and modified title.
+
+mytheme <-
+  theme_classic(base_size = 14)+
+    theme(panel.grid.major = element_line(colour = "grey80"))+
+  theme(plot.title = element_text(size = rel(1)))
+
+# the following code sets this theme as the default theme.
+theme_set(mytheme)
 
 ```
 
@@ -56,6 +96,20 @@ For numbers 4-7, create ggplot graphs and adjust aesthetics to follow best pract
 
 ```{r plot total P vs PO4}
 #4 
+# this code chunk makes a scatter plot of 
+# phosphorus by phosphate with two different colors for each lake.
+# Extreme values are hidden and a black line of best fit is in black.
+
+Lakes.phosphorus.phosphate <-
+  ggplot(Peter.Paul.chem.nutrients, aes(x = tp_ug, y = po4, color = lakename))+
+  geom_point()+
+  ylim(0, 40)+
+  geom_smooth(method=lm, color = 'black')+
+  xlab("Phosphorus")+
+  ylab("Phosphate")+
+labs(color = "Lake Names")+
+ggtitle("Phosphorus and Phosphate in Paul and Peter Lakes")
+print(Lakes.phosphorus.phosphate)
 
 ```
 
@@ -68,12 +122,68 @@ Tip:
 
 ```{r Create boxplots}
 #5 
+# Lakes.plot2 is a boxplot of temperature for each lake with improved readability.
+Lakes.plot2 <-
+  ggplot(Peter.Paul.chem.nutrients, 
+         aes(x = factor(month, 
+                        levels = 1:12, 
+                        labels=month.abb),
+                         y = temperature_C))+
+  geom_boxplot(aes(color = lakename))+
+  xlab("")+
+  ylab("Temp (C)")+
+  labs(color = "Lake Names")+
+  theme(legend.position = "none")+
+  scale_x_date(date_breaks = "1 months", date_labels = "%b %y")+
+  scale_x_discrete(drop=FALSE)
+print(Lakes.plot2) #this has no month label for the purposes of the 
+# combined plot.
+# Lakes.plot3 is an object that has the box plot by month for Total TP.
+Lakes.plot3 <-
+  ggplot(Peter.Paul.chem.nutrients, 
+         aes(x = factor(month, 
+                        levels = 1:12, 
+                        labels=month.abb),
+                         y = tp_ug)) +
+  geom_boxplot(aes(color = lakename))+
+   xlab("")+
+  ylab("Total TP")+
+labs(color = "Lake Names")+
+  theme(legend.position = "none")+
+  scale_x_date(date_breaks = "1 months", date_labels = "%b %y")+
+  scale_x_discrete(drop=FALSE)
+print(Lakes.plot3) #no month label on x axis for the purpose of combining later
+# Lakes.plot4 is an object holding the boxplot for the lakes for Total TN
+Lakes.plot4 <-
+  ggplot(Peter.Paul.chem.nutrients, 
+         aes(x = factor(month, 
+                        levels = 1:12, 
+                        labels=month.abb),
+                         y = tn_ug)) +
+  geom_boxplot(aes(color = lakename))+
+   xlab("")+
+  ylab("Total TN")+
+labs(color = "Lake Names")+
+    scale_x_date(date_breaks = "1 months", date_labels = "%b %y")+
+  scale_x_discrete(drop=FALSE)+
+  theme(legend.position = "bottom")
+print(Lakes.plot4)
+# this code chunk is plotting the three graphs together.
+combined.plot <-
+  plot_grid(Lakes.plot2, Lakes.plot3, Lakes.plot4, 
+          nrow =3,
+          align = 'v',
+         # axis = "bt", 
+          rel_heights = c(1.25,1.25,1.75)
+         )+
+  ggtitle("Temp, TP, TN")
+print(combined.plot)
 
 ```
 
 Question: What do you observe about the variables of interest over seasons and between lakes? 
 
-> Answer: 
+> Answer: There are no data collected from December to April; it is primarily collected May through September, with some temperature data collected in October and November. There are a significant number of outliers for Total TP and Total TN. Peter Lake generally has higher outliers and a wider spread than Paul Lake.
 
 6. [Niwot Ridge] Plot a subset of the litter dataset by displaying only the "Needles" functional group. Plot the dry mass of needle litter by date and separate by NLCD class with a color aesthetic. (no need to adjust the name of each land use)
 
@@ -81,12 +191,31 @@ Question: What do you observe about the variables of interest over seasons and b
 
 ```{r Plot litter}
 #6
-
+# This code chunk is making a new object for the scatterplot of the Needles subset 
+# of Neon.Niwo.litter.
+Litter.Needles.plot1 <-
+  ggplot(subset(Neon.Niwo.litter, functionalGroup == "Needles"),
+         aes(x= collectDate, y = dryMass, color = nlcdClass)) +
+  geom_point()+
+labs(color = "NLCD Class")+
+xlab("Collection Date")+
+ylab("Dry Mass")+
+  ggtitle("Needles Dry Mass by Collection Date")
+print(Litter.Needles.plot1)
 
 #7
-
+# plotting the needles subset with a facet_wrap.
+Litter.Needles.plot2 <-
+  ggplot(subset(Neon.Niwo.litter, functionalGroup == "Needles"),
+         aes(x= collectDate, y = dryMass)) +
+  geom_point()+
+  facet_wrap(vars(nlcdClass), nrow = 3)+
+xlab("Collection Date")+
+ylab("Dry Mass")+
+  ggtitle("Needles Dry Mass by Collection Date")
+print(Litter.Needles.plot2)
 
 ```
 Question: Which of these plots (6 vs. 7) do you think is more effective, and why? 
 
-> Answer:
+> Answer: I think that the faceted plot in Question 7 is more effective because within a single NLCD Class we are able to see the trends across the years, and looking down the columns we can visually compare each of the NLCD classes to each other. In the plot in Question 6, we can see some general trends through the years, but it is visually difficult to compare each of the NLCD classes to each other. 

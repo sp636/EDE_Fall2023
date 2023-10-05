@@ -16,16 +16,17 @@ editor_options:
 ## Opening discussion
 Effective data visualization depends on purposeful choices about graph types. The ideal graph type depends on the type of data and the message the visualizer desires to communicate. The best visualizations are clear and simple. A good resource for data visualization is [Data to Viz](https://www.data-to-viz.com/), which includes both a decision tree for visualization types and explanation pages for each type of data, including links to R resources to create them. Take a few minutes to explore this website.
 
+- ordered data: by time, for example
 ## Set Up
 
-```{r, message = FALSE, warning = FALSE}
+```{r message=FALSE, warning=FALSE}
 library(tidyverse);library(lubridate);library(here)
-library(ggridges)
+library(ggridges) # package to help build ridge plots
 
 here()
 
 PeterPaul.chem.nutrients <- 
-  read.csv(here("Data/Processed_KEY/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv"), stringsAsFactors = TRUE)
+  read.csv(here("Data/Processed_KEY/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv"), stringsAsFactors = TRUE) # I can't load this one
 PeterPaul.chem.nutrients.gathered <-
   read.csv(here("Data/Processed_KEY/NTL-LTER_Lake_Nutrients_PeterPaulGathered_Processed.csv"), stringsAsFactors = TRUE)
 EPAair <- read.csv(here("Data/Processed_KEY/EPAair_O3_PM25_NC1819_Processed.csv"), stringsAsFactors = TRUE)
@@ -46,23 +47,25 @@ ggplot has only a few rules:
 * Aesthetics must be specified, most commonly x and y variables but including others. Aesthetics can be specified in the `ggplot()` function or in subsequent layers.
 * Additional layers must be specified to fill the plot. 
 
+- ggplot2(dataframe.name, aesthetics)
+
 ### Geoms
 
 Here are some commonly used layers for plotting in ggplot: 
 
-* geom_bar
-* geom_histogram
-* geom_freqpoly
+* geom_bar - bar plot
+* geom_histogram 
+* geom_freqpoly - frequency plot 
 * geom_boxplot
 * geom_violin
 * geom_dotplot
 * geom_density_ridges
-* geom_point
+* geom_point (ex: scatterplot)
 * geom_errorbar
 * geom_smooth
 * geom_line
 * geom_area
-* geom_abline (plus geom_hline and geom_vline)
+* geom_abline (plus geom_hline and geom_vline) - can add a line with intercept a and slope b
 * geom_text
 
 ### Aesthetics
@@ -70,13 +73,14 @@ Here are some commonly used aesthetic types that can be manipulated in ggplot:
 
 * color
 * fill
-* shape
+* shape - of the point you are using
 * size
 * transparency
 
 ### Plotting continuous variables over time: Scatterplot and Line Plot
 
 ```{r, fig.height = 3, fig.width = 4, warning = FALSE}
+# adding the fig.height = 3 and fig.width =4 in the title makes it so it will be applied to all in this code chunk
 # Scatterplot
 ggplot(EPAair, aes(x = Date, y = Ozone)) + 
   geom_point()
@@ -84,27 +88,38 @@ ggplot(EPAair, aes(x = Date, y = Ozone)) +
 O3plot <- ggplot(EPAair) +
   geom_point(aes(x = Date, y = Ozone))
 print(O3plot)
+# store the ggplot in an object and then print it whenever
 
 # Fix this code
 O3plot2 <- ggplot(EPAair) +
-  geom_point(aes(x = Date, y = Ozone, color = "blue"))
+  # geom_point(aes(x = Date, y = Ozone, color = "blue"))
+  geom_point(aes(x = Date, y = Ozone), color = "blue")
 print(O3plot2)
+#for some reason, not blue
+# specifying color inside the aesthetics, its like adding a new layer to the plot
 
 # Add additional variables
-# How could you automatically assign a marker color to a variable? 
+# How could you automatically assign a marker color to a variable? done automatically
 PMplot <- 
   ggplot(EPAair, aes(x = Month, y = PM2.5, shape = as.factor(Year), color = Site.Name)) +
   geom_point()
 print(PMplot)
 
+# making a shape based on the year -- shape = as.factor(Year); and color as a function of site name (same site, same color)
+# not telling us much about the year... hard to read
+# separated by month
+
 # Separate plot with facets
+
 PMplot.faceted <-
   ggplot(EPAair, aes(x = Month, y = PM2.5, shape = as.factor(Year))) +
   geom_point() +
   facet_wrap(vars(Site.Name), nrow = 3)
 print(PMplot.faceted)
+# MUCH BETTER
 
 # Filter dataset within plot building and facet by multiple variables
+# how to do a graph of certain specific sites - make a subset by year
 PMplot.faceted2 <- 
   ggplot(subset(EPAair, Site.Name == "Clemmons Middle" | Site.Name == "Leggett" |
                   Site.Name == "Bryson City"), 
@@ -113,7 +128,9 @@ PMplot.faceted2 <-
   facet_grid(Site.Name ~ Year) 
 print(PMplot.faceted2)
 
-# Plot true time series with geom_line
+
+# Plot true time series with geom_line - connect the points
+#didn't run for me
 PMplot.line <- 
   ggplot(subset(EPAair, Site.Name == "Leggett"), 
          aes(x = Date, y = PM2.5)) +
@@ -137,8 +154,8 @@ print(lightvsDO)
 lightvsDOfixed <- 
   ggplot(PeterPaul.chem.nutrients, aes(x = irradianceWater, y = dissolvedOxygen)) +
   geom_point() +
-  xlim(0, 250) +
-  ylim(0, 20)
+  xlim(0, 250) + # limiting the x limit
+  ylim(0, 20) # limiting the y axis
 print(lightvsDOfixed)
 
 # Depth in the fields of limnology and oceanography is on a reverse scale
@@ -152,8 +169,8 @@ print(tempvsdepth)
 NvsP <-
   ggplot(PeterPaul.chem.nutrients, aes(x = tp_ug, y = tn_ug, color = depth)) +
   geom_point() +
-  geom_smooth(method = lm) +
-  geom_abline(aes(slope = 16, intercept = 0))
+  geom_smooth(method = lm) + #to add trendline
+ geom_abline(aes(slope = 16, intercept = 0))
 print(NvsP)
 
 ```
@@ -162,6 +179,8 @@ print(NvsP)
 A traditional way to display summary statistics of continuous variables is a bar plot with error bars. Let's explore why this might not be the most effective way to display this type of data. Navigate to the Caveats page on Data to Viz (https://www.data-to-viz.com/caveats.html) and find the page that explores barplots and error bars. 
 
 What might be more effective ways to display the information? Navigate to the boxplots page in the Caveats section to explore further.
+
+blox pots are better than bar charts --- doesn't show the error, just the mean
 
 ```{r, fig.height = 3, fig.width = 4, warning = FALSE}
 # Box and whiskers plot
@@ -177,14 +196,14 @@ Nutrientplot4 <-
                stackdir = "center", position = "dodge", dotsize = 2) #
 print(Nutrientplot4)
 
-# Violin plot
+# Violin plot also shows density 
 Nutrientplot5 <-
   ggplot(PeterPaul.chem.nutrients.gathered, aes(x = lakename, y = concentration)) +
   geom_violin(aes(color = nutrient)) #
 print(Nutrientplot5)
 
 # Frequency polygons
-# Using a tidy dataset
+# Using a tidy dataset; no legend though;
 Nutrientplot6 <-
   ggplot(PeterPaul.chem.nutrients) +
   geom_freqpoly(aes(x = tn_ug), color = "darkred") +
@@ -194,7 +213,7 @@ Nutrientplot6 <-
   geom_freqpoly(aes(x = po4), color = "red") 
 print(Nutrientplot6)
 
-# Using a gathered dataset
+# Using a gathered dataset --- MUCH BETTER THAN THE TINY DATASET ONE ABOVE
 Nutrientplot7 <-   
   ggplot(PeterPaul.chem.nutrients.gathered) +
   geom_freqpoly(aes(x = concentration, color = nutrient))
@@ -208,6 +227,6 @@ Nutrientplot6 <-
   ggplot(PeterPaul.chem.nutrients.gathered, aes(y = nutrient, x = concentration)) +
   geom_density_ridges(aes(fill = lakename), alpha = 0.5) #
 print(Nutrientplot6)
-
+# fill - fills with color below the inside of the curves
 
 ```
