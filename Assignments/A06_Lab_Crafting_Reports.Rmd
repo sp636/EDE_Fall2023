@@ -133,7 +133,7 @@ print(Ozone2019_boxplot)
 
 ------------------------------------------------------------------------
 
-\newpage
+\newpage 
 
 ## Task 4: Knit and submit.
 
