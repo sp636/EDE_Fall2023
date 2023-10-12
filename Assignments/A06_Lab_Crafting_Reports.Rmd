@@ -6,7 +6,7 @@ toc: TRUE
 output: pdf_document
 ---
 
-## Objectives:
+## Objectives: 
 
 1.  More practice with R code chunk options
 2.  Gain proficiency with figures, tables (w/`Kable`) table of contents, etc.
