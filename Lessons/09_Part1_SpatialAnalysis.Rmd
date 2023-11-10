@@ -32,7 +32,7 @@ The packages we'll need for this lesson are below. Install as necessary and ensu
 library(tidyverse, quietly = TRUE)
 library(lubridate); library(here)
 
-#install.packages('sf')
+#install.packages('sf') - does vector data
 library(sf)
 #install.packages('leaflet')
 library(leaflet)
@@ -60,7 +60,7 @@ These geometries represent features located in geographic space. (There are othe
 A **coordinate reference system** or **crs** includes the information used to reference the coordinates used in defining a geometry with actual geographic locations. These will be discussed more later. 
 
 ## 2.3 Simple feature: geometry + attributes + crs
-A **simple feature** is one geographic element along with its attributes. In other words, it's a row in a dataframe when that dataframe includes a column for geometry. 
+A **simple feature** is one geographic element along with its attributes (observations about it). In other words, it's a row in a dataframe when that dataframe includes a column for geometry. 
 
 ## 2.4 Spatial dataframe 
 A **spatial dataframe**, also referred to as **simple features** (or `sf`), **spatially enabled dataframe**, or **geodataframe** is a collection of simple features (geometry + attribute + crs) stored in the format of a dataframe. It inherits all the capabilities of a standard dataframe but also has spatial analysis capabilities. 
@@ -72,6 +72,11 @@ Let's read some geospatial data into our coding environment. The file we'll read
 -   Find and extend the dropdown list for `View API Resources`
 -   Copy the link associated with the `GeoJSON` service
 
+
+- download in geojson format!
+- take the web URL and put into the code
+- sf library has the command st_read and reads it off the internet; pointing straight to the website; it would become a sf object
+
 ```{r Read in road data}
 #Read a spatial dataset
 GasPlants <- st_read('https://opendata.arcgis.com/datasets/a0722062315143a7980cebb79a204781_4.geojson')
@@ -79,18 +84,18 @@ GasPlants <- st_read('https://opendata.arcgis.com/datasets/a0722062315143a7980ce
 #GasPlants <- st_read(here('Data/Spatial/Manufactured_Gas_Plant_Sites.geojson'))
 
 #Explore
-class(GasPlants)
-names(GasPlants)
-str(GasPlants$geometry)
+class(GasPlants) # tells us it is a dataframe
+names(GasPlants) # tells us the names of columns
+str(GasPlants$geometry) # look at the structure; it is a simple feature column of points
 
 #View using sf plot
-plot(GasPlants['status'],pch=16)
+plot(GasPlants['status'],pch=16) # status is a column; not that pretty
 
 #View using ggplot
-ggplot(data=GasPlants) + geom_sf()
+ggplot(data=GasPlants) + geom_sf() # can use ggplot; 
 
 #View using mapview
-mapview(GasPlants)
+mapview(GasPlants) #map withe the backdrop, can change backdrops. looks like GIS
 
 ```
 
@@ -98,10 +103,11 @@ mapview(GasPlants)
 ## EXERCISE: Creating a spatial dataframe from coordinate columns
 
 ```{r Create a spatial dataframe from coordinate data}
+#how to grab data that has spatial info but isn't a spatial dataframe
 
 #Read in our processed EPA Air dataset, setting the Date column to be dates
 EPAair <- read.csv(here("Data/Processed_KEY/EPAair_O3_PM25_NC1819_Processed.csv"), stringsAsFactors = TRUE) %>% 
-  mutate(Date = ymd(Date))
+  mutate(Date = ymd(Date)) # has lat and long info
 
 #Wrangle so each site has only one record, computing mean ozone and PM2.5 at that site
 EPAair.sites <- EPAair %>% 
@@ -109,7 +115,7 @@ EPAair.sites <- EPAair %>%
   summarize(
     mean_Ozone = mean(Ozone, na.rm=T),    #What does "na.rm=T" do? Is it necessary?
     mean_PM25 = mean(PM2.5, na.rm=T),
-    count_all = n(),
+    count_all = n(), # counts
     count_Ozone = sum(!is.na(Ozone)),
     count_PM25 = sum(!is.na(PM2.5)))
 
@@ -117,26 +123,35 @@ EPAair.sites <- EPAair %>%
 EPAair.sf <- EPAair.sites %>% 
   st_as_sf(coords = c('mean_Lng','mean_Lat'),
            crs=4326)
+# supply (coords = c('LONG (long is x), 'LAT (lat is y), coordinate reference systems = ###))
+# collapsing lat and long into geometry
 
 #View the data using the methods above...
+#View using sf plot
+plot(EPAair.sf['mean_Ozone'],pch=16) # status is a column; not that pretty
 
+#View using ggplot
+ggplot(data=EPAair.sf) + geom_sf() # can use ggplot; 
+
+#View using mapview
+mapview(EPAair.sf)
 ```
 
 ### EXERCISE: Creating a spatial dataframe from known coordinates
 
 ```{r Create a spatial dataframe from scratch}
-#First create a simple feature geometry object ("sfg")
-sfg_GraingerHall <- st_point(c(-78.9427,36.00465))
+#First create a simple feature geometry object ("sfg")- just the location
+sfg_GraingerHall <- st_point(c(-78.9427,36.00465)) # lat and long for Grainger Hall, doesn't know where that coordinate links to earth
 class(sfg_GraingerHall)
 mapview(sfg_GraingerHall)
 
 #Upgrade to a simple feature geometry column by adding a crs 
-sfc_GraingerHall <- st_sfc(sfg_GraingerHall,crs=4326)
-class(sfc_GraingerHall)
+sfc_GraingerHall <- st_sfc(sfg_GraingerHall,crs=4326) # crs tells R that it is lat/long; must tie to a coordinate reference system
+class(sfc_GraingerHall) # its a point
 mapview(sfc_GraingerHall)
 
 #Upgrade to a spatial dataframe
-sf_GraingerHall <- st_as_sf(sfc_GraingerHall)
+sf_GraingerHall <- st_as_sf(sfc_GraingerHall) # want to make it a simple feature dataframe (st as sf); now want to put some attributes
 sf_GraingerHall$Name = 'Grainger Hall'
 mapview(sf_GraingerHall)
 
@@ -145,21 +160,27 @@ mapview(sf_GraingerHall)
 ## 2.5 Summary
 So, we see that our "sf" dataframe works much like our familiar dataframe, only it has a new column containing *geometries* for each record. This pretty much sums up what a GIS is: a familiar table of records and attributes (i.e. an "Information System"), but with one attribute that includes a geometry that allows us to incorporate geography into our analysis (i.e. a "*Geographic* Information System")!
 
+END OF VIDEO 1!
+
 ---
 
 # 3. COORDINATE REFERENCE SYSTEMS
-Each of the above datasets we explored use lat/long coordinates in defining their geometries. We actually specify that these use lat/long coordinate when creating them via the `crs = 4326` parameter you see in the examples. But what is "4326"?? And what is the significance of this? 
+Each of the above datasets we explored use lat/long coordinates in defining their geometries. We actually specify that these use lat/long coordinate when creating them via the `crs = 4326` parameter you see in the examples. But what is "4326"?? And what is the significance of this?
+
+spherical angles need to transform to linear distances; called projection
 
 Let's explore:
 
 ## EXERCISE: Buffering - a simple spatial analyis
 "Buffering" a simple feature extends the area outward a specified distance. The code below buffers Grainger Hall 1 "unit". 
 ```{r buffer Grainger hall}
-#Buffer Grainger Hall 1 unit
+#Buffer Grainger Hall 1 unit: buffering is simple spatial analysis and expand it outward a certain unit of measure
 the_buffer <- sf_GraingerHall %>% st_buffer(1)
+# 1 refers to 1 degree, and looks odd, how to reconfigure
+# trying to flatten an orange peel - will be distorted
 
 #View the result
-mapview(the_buffer)
+mapview(the_buffer) # looks like an oval, through piedmont
 ```
 
 A bit odd, no? Why is the circle so big? What is the units of '1'? And why is it oval, not a circle? This has much to do with the fact that the geometric units of our feature are measured in angular units (degrees) and not familiar planar ones (like meters or feet). And that's because latitude and longitude measure location on a sphere, and we like doing calculations on a plane...
@@ -170,14 +191,16 @@ Projecting data is the process of converting spherical coordinates to Cartesian 
 
  * You can't flatten a sphere into a plane without distorting area, distance, shape, and/or direction.
  
- * The earth is not a perfect sphere to begin with.
+ * The earth is not a perfect sphere to begin with. ..... distortion not just from projection; confusing quickly. come up with different models of earth surface and coordinate systems
 
 The "solution" to these issues involves creating a vast number of different coordinate reference systems, each consisting of:
 
 1. A mathematical representation of the earth's shape, often constrained to a specific extent to enhance accuracy at that extent (at the cost of increased distortion away from that extent). These representations are referred to as the `datums`, `spheroids`, or `ellipsoids` of a specific coordinate reference system. 
+- more specific datums, spheroids or ellipsoids that are local/specific to a certain place
 
 2. A coordinate system, defined by the units of measurement (either angular [degrees], or planar [meters or feet]), and the location of its origin. Projected coordinate systems tend to be more accurate at their origin, with distortion increasing as you move away; thus you'd want to select a coordinate reference system who's origin is closest to the features in your analysis. 
-
+(prime meridian and equator)
+universal transverse mercator - number of zones (NC is in zone 17 - NC is pretty close to the origin)
 All simple features need to be associated with a defined coordinate reference system. The crs can be *geographic*, where coordinate values remain in angular units, or *project* where the angular units have been translated into planar ones using some form of projection method. The crs associated with the simple features provides critical information for processing spatial analyses such as computing distances, calculating areas, etc. It also enables datasets using one crs to be **transformed** into another crs so that analyses can be done across spatial datasets.  
 
 
@@ -194,6 +217,8 @@ Some CRS, however, do not have an associated EPSG code, and for those, we can us
 **EPSG:4326**
 
 WGS 84 or WGS84 (World Geodetic System 1984, used in GPS) <http://epsg.io/4326>
+European Petroleum Survey Group
+4326: refers to a popular, default coordinate system
 
 **EPSG:102008**
 
@@ -224,28 +249,30 @@ Say we want to the distance between our EPA sites and the nearest Gas Plant. We 
 
 ```{r Transform the dataset}
 #Transform the datasets to use UTM 17 N, WGS84
-EPAair.sf.utm <- st_transform(EPAair.sf,32617)
+EPAair.sf.utm <- st_transform(EPAair.sf,32617) #projecting to EPSG coordinate; how to find which one to do? use st_transform. output is in meters from origins
 GasPlants.utm <- st_transform(GasPlants,32617)
 
 #Have a look at the coordinate associated with the geometries
 EPAair.sf.utm$geometry[1]
 
-#Plot the data
+#Plot the data, axis written in degrees but the line is curved because it is projected
 ggplot() +
   geom_sf(data = EPAair.sf.utm,color='blue') + 
   geom_sf(data = GasPlants.utm,color='red',shape='O') 
 
 #Create a distance matrix between the point in each dataset
 distance_matrix <- st_distance(EPAair.sf.utm, GasPlants.utm, pairwise=T)
+# pairwise means we want to create a matrix
 
-#Compute the mean of each row (each EPA site)
+#Compute the mean of each row (each EPA site) - reduce the dataset to just means
 mean_distances <-  rowMeans(distance_matrix)
 
 #Add as a column to the epa sites
 EPAair.sf.utm  <-  EPAair.sf.utm %>% 
   bind_cols("AvgDistToGasPlant" = mean_distances)
 
-
+# use ggplot to map size of plants based on distance
 
 ```
 
+END OF VIDEO 2!
